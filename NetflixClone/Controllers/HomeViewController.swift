@@ -21,6 +21,7 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
     
         self.setupView()
+        self.configNavbar()
         self.view.backgroundColor = .systemBackground
     }
     
@@ -45,6 +46,18 @@ class HomeViewController: UIViewController {
         
         let heroHeaderView = HeroHeaderView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 450))
         self.homeFeedTable.tableHeaderView = heroHeaderView
+    }
+    
+    private func configNavbar() {
+        let rawLogo = UIImage(named: "app_logo")
+        let smallLogo = rawLogo?.resized(to: CGSize(width: 25, height: 25))?.withRenderingMode(.alwaysOriginal)
+
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: smallLogo, style: .done, target: self, action: nil)
+        self.navigationItem.rightBarButtonItems = [
+            UIBarButtonItem(image: UIImage(systemName: "person"), style: .done, target: self, action: nil),
+            UIBarButtonItem(image: UIImage(systemName: "play.rectangle"), style: .done, target: self, action: nil)
+        ]
+        self.navigationController?.navigationBar.tintColor = .white
     }
 }
 
@@ -71,5 +84,12 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         return cell
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let defaultOffset = view.safeAreaInsets.top
+        let offsetY = scrollView.contentOffset.y + defaultOffset
+        
+        navigationController?.navigationBar.transform = .init(translationX: 0, y: -offsetY)
     }
 }
