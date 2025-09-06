@@ -10,17 +10,17 @@ import Foundation
 
 class HomeViewModel {
 
-    private let repository: HomeRepositoryProtocol
+    private let repository: HomeRepository
     private let disposeBag = DisposeBag()
 
     let trendingMovies  = PublishSubject<[Movie]>()
     let errorMessage    = PublishSubject<String>()
 
-    init(repository: HomeRepositoryProtocol = HomeRepository()) {
+    init(repository: HomeRepository = HomeRepository()) {
         self.repository = repository
     }
 
-    func loadHomeData() {
+    func fetchTrendingMovies() {
         repository.fetchTrendingMovies()
             .subscribe(
                 onNext: { [weak self] response in
