@@ -9,8 +9,6 @@ enum Environment {
     case staging
     case production
     
-    //    Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String ?? ""
-    
     var domain: String {
         switch self {
         case .staging:
