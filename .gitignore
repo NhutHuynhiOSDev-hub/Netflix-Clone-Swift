@@ -1,0 +1,12 @@
+# Ignore environment files
+.env
+
+# Ignore build products
+build/
+DerivedData/
+
+# Ignore Xcode temporary files
+*.xcworkspace
+*.xcuserdata
+*.swp
+*.DS_Store

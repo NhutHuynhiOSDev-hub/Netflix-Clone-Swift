@@ -6,8 +6,13 @@
 //
 
 import UIKit
+import RxSwift
 
 class HomeViewController: UIViewController {
+    
+    private let disposeBag      = DisposeBag()
+    private let viewModel       = HomeViewModel()
+    private let sectionTitle    = ["Trending Movies", "Popular", "TV Shows", "Trending TV", "Upcomming Movies", "Top Rated"]
     
     private let homeFeedTable: UITableView = {
         let feedTable = UITableView(frame: .zero, style: .grouped)
@@ -19,7 +24,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
         self.setupView()
         self.configNavbar()
         self.view.backgroundColor = .systemBackground
@@ -31,8 +36,15 @@ class HomeViewController: UIViewController {
         self.homeFeedTable.frame = self.view.bounds
     }
     
-
+    
     private func setupView() {
+        
+        bindViewModel()
+        viewModel.loadHomeData()
+        
+        if let apiKey = Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String {
+            print("API Key: \(apiKey)")
+        }
         
         self.view.addSubview(self.homeFeedTable)
         
@@ -51,7 +63,7 @@ class HomeViewController: UIViewController {
     private func configNavbar() {
         let rawLogo = UIImage(named: "app_logo")
         let smallLogo = rawLogo?.resized(to: CGSize(width: 25, height: 25))?.withRenderingMode(.alwaysOriginal)
-
+        
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: smallLogo, style: .done, target: self, action: nil)
         self.navigationItem.rightBarButtonItems = [
             UIBarButtonItem(image: UIImage(systemName: "person"), style: .done, target: self, action: nil),
@@ -59,16 +71,52 @@ class HomeViewController: UIViewController {
         ]
         self.navigationController?.navigationBar.tintColor = .white
     }
+    
+    private func bindViewModel() {
+        
+        // Trending movies
+        viewModel.trendingMovies
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] movies in
+                print("HERE: \(movies)")
+            }).disposed(by: disposeBag)
+        
+        viewModel.errorMessage
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] message in
+                self?.showAlert(message)
+            }).disposed(by: disposeBag)
+    }
+    
+    private func showAlert(_ message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 20
+        return self.sectionTitle.count
     }
-    
+        
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 40
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return self.sectionTitle[section]
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let header = view as? UITableViewHeaderFooterView else { return }
+        
+        header.textLabel?.textColor = .label
+        header.textLabel?.text      = header.textLabel?.text?.capitalized
+        header.textLabel?.font      = .systemFont(ofSize: 18, weight: .semibold)
+        header.textLabel?.frame     = CGRect(x: header.bounds.origin.x + 20, y: header.bounds.origin.y, width: 100, height: header.bounds.height)
+        
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
