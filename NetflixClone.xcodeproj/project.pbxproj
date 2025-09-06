@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		642399A22E6C0482005DE7DB /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 642399A12E6C0482005DE7DB /* SDWebImage */; };
+		642399A42E6C0482005DE7DB /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 642399A32E6C0482005DE7DB /* SDWebImageMapKit */; };
 		BDEAB76340017B19696B28BC /* Pods_NetflixClone.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 669036F22B409D9643201148 /* Pods_NetflixClone.framework */; };
 /* End PBXBuildFile section */
 
@@ -43,6 +45,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				642399A22E6C0482005DE7DB /* SDWebImage in Frameworks */,
+				642399A42E6C0482005DE7DB /* SDWebImageMapKit in Frameworks */,
 				BDEAB76340017B19696B28BC /* Pods_NetflixClone.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -134,6 +138,9 @@
 			);
 			mainGroup = 649DA20E2E69E1FB00FB735B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				642399A02E6C0482005DE7DB /* XCRemoteSwiftPackageReference "SDWebImage" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 649DA2182E69E1FB00FB735B /* Products */;
 			projectDirPath = "";
@@ -426,6 +433,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		642399A02E6C0482005DE7DB /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.21.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		642399A12E6C0482005DE7DB /* SDWebImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 642399A02E6C0482005DE7DB /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImage;
+		};
+		642399A32E6C0482005DE7DB /* SDWebImageMapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 642399A02E6C0482005DE7DB /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImageMapKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 649DA20F2E69E1FB00FB735B /* Project object */;
 }

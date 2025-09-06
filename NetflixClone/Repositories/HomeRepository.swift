@@ -9,11 +9,11 @@ import RxSwift
 import Foundation
 
 // Repository Protocol
-protocol HomeRespositoryProtocol {
+protocol HomeRepositoryProtocol {
     func fetchTrendingMovies() -> Observable<TrendingMoviesResponse>
 }
 
-struct HomeRespository: HomeRespositoryProtocol {
+struct HomeRepository: HomeRepositoryProtocol {
     
     let environment: Environment
     

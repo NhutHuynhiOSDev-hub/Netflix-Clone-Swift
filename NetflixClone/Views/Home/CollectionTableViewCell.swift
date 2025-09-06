@@ -7,8 +7,11 @@
 
 import UIKit
 
-class CollectionTableViewCell: UITableViewCell {
-    static let identifier = "CollectionTableViewCell"
+class HomeColletionViewTableViewCell: UITableViewCell {
+    
+    static let identifier = "HomeColletionViewTableViewCell"
+    
+    private var title: [Movie] = [Movie]()
     
     private let collectionView: UICollectionView = {
         let layout              = UICollectionViewFlowLayout()
@@ -16,7 +19,7 @@ class CollectionTableViewCell: UITableViewCell {
         layout.itemSize         = CGSize(width: 140, height: 200)
         
         let collectionView      = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "collectionViewCell")
+        collectionView.register(TitleCollectionViewCell.self, forCellWithReuseIdentifier: TitleCollectionViewCell.identifier)
         
         return collectionView
     }()
@@ -45,19 +48,24 @@ class CollectionTableViewCell: UITableViewCell {
         self.collectionView.delegate    = self
         self.collectionView.dataSource  = self
     }
+    
+    public func configure(with movie: [Movie]) {
+        self.title = movie
+//        self.collectionView.reloadData()
+    }
 }
 
-extension CollectionTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource {
+extension HomeColletionViewTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return self.title.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectionViewCell", for: indexPath)
+        guard let titleCollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier: TitleCollectionViewCell.identifier, for:  indexPath) as? TitleCollectionViewCell else { return UICollectionViewCell() }
         
-        cell.backgroundColor = .systemMint
+        titleCollectionViewCell.configure(with: self.title[indexPath.row].posterPath)
         
-        return cell
+        return titleCollectionViewCell
     }
 }
         

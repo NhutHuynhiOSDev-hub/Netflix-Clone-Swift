@@ -8,16 +8,27 @@
 import UIKit
 import RxSwift
 
+enum HomeSections: Int {
+    case TrendingMovie = 0
+    case TrendingTV = 1
+    case Popular = 2
+    case Upcoming = 3
+    case TopRated = 4
+//    case TVShows = 5
+}
+
 class HomeViewController: UIViewController {
     
     private let disposeBag      = DisposeBag()
     private let viewModel       = HomeViewModel()
+    
+    private var trendingMovies  = [Movie]()
     private let sectionTitle    = ["Trending Movies", "Popular", "TV Shows", "Trending TV", "Upcomming Movies", "Top Rated"]
     
     private let homeFeedTable: UITableView = {
         let feedTable = UITableView(frame: .zero, style: .grouped)
         
-        feedTable.register(CollectionTableViewCell.self, forCellReuseIdentifier: CollectionTableViewCell.identifier)
+        feedTable.register(HomeColletionViewTableViewCell.self, forCellReuseIdentifier: HomeColletionViewTableViewCell.identifier)
         
         return feedTable
     }()
@@ -40,7 +51,7 @@ class HomeViewController: UIViewController {
     private func setupView() {
         
         bindViewModel()
-        viewModel.loadHomeData()
+        self.loadHomeData()
         
         if let apiKey = Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String {
             print("API Key: \(apiKey)")
@@ -78,7 +89,8 @@ class HomeViewController: UIViewController {
         viewModel.trendingMovies
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] movies in
-                print("HERE: \(movies)")
+                self?.trendingMovies = movies
+                self?.homeFeedTable.reloadSections(IndexSet(integer: HomeSections.TrendingMovie.rawValue), with: .automatic)
             }).disposed(by: disposeBag)
         
         viewModel.errorMessage
@@ -92,6 +104,11 @@ class HomeViewController: UIViewController {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    private func loadHomeData() {
+        
+        self.viewModel.fetchTrendingMovies()
     }
 }
 
@@ -113,10 +130,9 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         guard let header = view as? UITableViewHeaderFooterView else { return }
         
         header.textLabel?.textColor = .label
-        header.textLabel?.text      = header.textLabel?.text?.capitalized
         header.textLabel?.font      = .systemFont(ofSize: 18, weight: .semibold)
+        header.textLabel?.text      = header.textLabel?.text?.capitalizingFirstLetter()
         header.textLabel?.frame     = CGRect(x: header.bounds.origin.x + 20, y: header.bounds.origin.y, width: 100, height: header.bounds.height)
-        
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -128,10 +144,17 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: CollectionTableViewCell.identifier, for: indexPath) as? CollectionTableViewCell else { return UITableViewCell()
+        guard let homeColletionViewTableViewCell = tableView.dequeueReusableCell(withIdentifier: HomeColletionViewTableViewCell.identifier, for: indexPath) as? HomeColletionViewTableViewCell else { return UITableViewCell()
         }
         
-        return cell
+        switch indexPath.section {
+        case HomeSections.TrendingMovie.rawValue:
+            homeColletionViewTableViewCell.configure(with: self.trendingMovies)
+            
+        default : break
+        }
+        
+        return homeColletionViewTableViewCell
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
