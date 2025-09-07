@@ -17,4 +17,14 @@ enum Environment {
             return "https://api.themoviedb.org"
         }
     }
+    
+    var youtubeDomain: String {
+        switch self {
+        case .staging:
+            return "https://youtube.googleapis.com"
+//            GET https://youtube.googleapis.com/youtube/v3/search?key=[YOUR_API_KEY] HTTP/1.1
+        case .production:
+            return "https://youtube.googleapis.com"
+        }
+    }
 }

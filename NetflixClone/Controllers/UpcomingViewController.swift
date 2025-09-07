@@ -12,7 +12,7 @@ class UpcomingViewController: UIViewController {
     private let upcomingTableView: UITableView = {
         let upcomingTableView = UITableView()
         
-        upcomingTableView.register(UITableViewCell.self, forCellReuseIdentifier: UpcomingTableViewCell.identifier)
+        upcomingTableView.register(UpcomingTableViewCell.self, forCellReuseIdentifier: UpcomingTableViewCell.identifier)
     
         return upcomingTableView
     }()
@@ -21,6 +21,12 @@ class UpcomingViewController: UIViewController {
         super.viewDidLoad()
         
         self.setupView()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        self.upcomingTableView.frame = self.view.bounds
     }
     
     private func setupView() {
@@ -33,7 +39,6 @@ class UpcomingViewController: UIViewController {
         
         self.upcomingTableView.delegate   = self
         self.upcomingTableView.dataSource = self
-        self.upcomingTableView.frame      = self.view.bounds
         self.view.addSubview(self.upcomingTableView)
     }
 }
