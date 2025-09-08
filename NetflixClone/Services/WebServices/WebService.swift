@@ -8,38 +8,60 @@
 import Foundation
 
 enum HTTPMethod: String {
-    case get     = "GET"
-    case post    = "POST"
-    case put     = "PUT"
-    case patch   = "PATCH"
-    case delete  = "DELETE"
+    case get
+    case post
+    case put
+    case delete
+    
+    var method: String {
+        switch self {
+        case .get: 
+            return "GET"
+        case .put: 
+            return "PUT"
+        case .post: 
+            return "POST"
+        case .delete: 
+            return "DELETE"
+        }
+    }
 }
 
-struct WebService {
+struct WebServices {
 
     static func request<T: BaseResponseProtocol & Decodable>(
-        environment: Environment,
-        endpoint: APIPath,
-        method: HTTPMethod,
-        body: Data? = nil,
-        completion: @escaping (Result<T, APIError>) -> Void
+        apiEndpoint: APIEndpoint,
+        completion: @escaping(Result<T, APIError>) -> Void
     ) {
-        let urlString = environment.domain + endpoint.path
-        guard let url = URL(string: urlString) else {
-            completion(.failure(.badRequest))
+        guard var urlComponents = URLComponents(string: apiEndpoint.domain.domain + apiEndpoint.path.path) else {
+            completion(.failure(.invalidURL))
             return
         }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = method.rawValue
-        request.httpBody = body
-
-        // Thêm header
-        let headers = APIHeader.defaultHeaders()
-        headers.forEach { key, value in
-            request.addValue(value, forHTTPHeaderField: key)
+        
+        if let query = apiEndpoint.query, !query.isEmpty {
+            urlComponents.queryItems = query.map{ URLQueryItem(name: $0.key, value: $0.value) }
         }
-
+        guard let url = urlComponents.url else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = apiEndpoint.method.method
+        
+        switch apiEndpoint.domain {
+        case .movieDB(enviroment: .staging), .movieDB(enviroment: .production):
+            let token = APIHeader.authenToken ?? ""
+            request.allHTTPHeaderFields = ["Content-Type": "application/json", "Accept": "application/json", "Authorization": "Bearer \(token)"]
+            
+        case .youtube(enviroment: .staging), .youtube(enviroment: .production):
+            request.allHTTPHeaderFields = ["Content-Type": "application/json", "Accept": "application/json"]
+        }
+        
+        if let body = apiEndpoint as? HasBody {
+            request.httpBody = body.body
+        }
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let _ = error {
                 completion(.failure(.network))
@@ -50,13 +72,14 @@ struct WebService {
                 completion(.failure(.unknown))
                 return
             }
-
+            
             do {
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 
                 let decoded = try decoder.decode(T.self, from: data)
                 completion(.success(decoded))
+                
             } catch {
                 completion(.failure(.unprocessable))
             }

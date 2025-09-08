@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import RxSwift
 
 enum HomeSections: Int {
     case TrendingMovie = 0
@@ -19,7 +18,6 @@ enum HomeSections: Int {
 
 class HomeViewController: UIViewController {
     
-    private let disposeBag      = DisposeBag()
     private let viewModel       = HomeViewModel()
     
     private var trendingMovies  = [Movie]()
@@ -50,7 +48,7 @@ class HomeViewController: UIViewController {
     
     private func setupView() {
         
-        bindViewModel()
+        self.bindViewModel()
         self.loadHomeData()
         
         if let apiKey = Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String {
@@ -86,18 +84,22 @@ class HomeViewController: UIViewController {
     private func bindViewModel() {
         
         // Trending movies
-        viewModel.trendingMovies
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] movies in
+        viewModel.onDataUpdate = { [weak self] data in
+            switch data {
+            case .trendingMovies(let movies):
                 self?.trendingMovies = movies
                 self?.homeFeedTable.reloadSections(IndexSet(integer: HomeSections.TrendingMovie.rawValue), with: .automatic)
-            }).disposed(by: disposeBag)
+            case .topRatedMovies(let movies):
+                break
+            }
+        }
         
-        viewModel.errorMessage
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] message in
-                self?.showAlert(message)
-            }).disposed(by: disposeBag)
+        viewModel.onErrorUpdate = { [weak self] message in
+            // Hiện alert lỗi
+//            let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+//            alert.addAction(UIAlertAction(title: "OK", style: .default))
+//            self?.present(alert, animated: true)
+        }
     }
     
     private func showAlert(_ message: String) {
@@ -108,7 +110,7 @@ class HomeViewController: UIViewController {
     
     private func loadHomeData() {
         
-        self.viewModel.fetchTrendingMovies()
+        self.viewModel.fetchTrendingMovies(page: 1)
     }
 }
 

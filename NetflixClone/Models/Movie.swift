@@ -2,10 +2,10 @@
 //  Movie.swift
 //  NetflixClone
 //
-//  Created by Nhut Huynh Quang on 5/9/25.
+//  Created by Nhut Huynh Quang on 8/9/25.
 //
 
-import Foundation
+import UIKit
 
 struct Movie: Decodable {
     

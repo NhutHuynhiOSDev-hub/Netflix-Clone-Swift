@@ -5,31 +5,36 @@
 //  Created by Nhut Huynh Quang on 5/9/25.
 //
 
-import RxSwift
 import Foundation
+
+enum HomeDataType {
+    case topRatedMovies([Movie])
+    case trendingMovies([Movie])
+}
+
 
 class HomeViewModel {
 
-    private let repository: HomeRepository
-    private let disposeBag = DisposeBag()
+    private let homeRepository: HomeRepositoryProtocol
+    
+    var onDataUpdate:((HomeDataType) -> Void)?
+    var onErrorUpdate:((String) -> Void)?
 
-    let trendingMovies  = PublishSubject<[Movie]>()
-    let errorMessage    = PublishSubject<String>()
-
-    init(repository: HomeRepository = HomeRepository()) {
-        self.repository = repository
+    init(homeRepository: HomeRepository = HomeRepository()) {
+        self.homeRepository = homeRepository
     }
 
-    func fetchTrendingMovies() {
-        repository.fetchTrendingMovies()
-            .subscribe(
-                onNext: { [weak self] response in
-                    self?.trendingMovies.onNext(response.results)
-                },
-                onError: { [weak self] error in
-                    self?.errorMessage.onNext(error.localizedDescription)
+    func fetchTrendingMovies(page: Int = 1) {
+        homeRepository.fetchTrendingMovies(page: page) { [weak self] result in
+            switch result {
+            case .success(let movies):
+                DispatchQueue.main.async {
+                    self?.onDataUpdate?(.trendingMovies(movies))
                 }
-            ).disposed(by: disposeBag)
+            case .failure(let error): print("Error:", error)
+                self?.onErrorUpdate?(error.localizedDescription)
+            }
+        }
     }
 }
 

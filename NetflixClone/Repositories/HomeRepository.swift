@@ -10,30 +10,20 @@ import Foundation
 
 // Repository Protocol
 protocol HomeRepositoryProtocol {
-    func fetchTrendingMovies() -> Observable<TrendingMoviesResponse>
+    func fetchTrendingMovies(page: Int, completion: @escaping (Result<[Movie], APIError>) -> Void)
 }
 
 struct HomeRepository: HomeRepositoryProtocol {
     
-    let environment: Environment
-    
-    init(environment: Environment = .staging) {
-        
-        self.environment = environment
-    }
-    
-    func fetchTrendingMovies() -> Observable<TrendingMoviesResponse> {
-        return Observable.create { observer in
-            WebService.request(environment: self.environment, endpoint: .getTrendingMovies, method: .get) { (results: Result<TrendingMoviesResponse, APIError>) in
-                switch results {
-                case .success(let response):
-                    observer.onNext(response)
-                    observer.onCompleted()
-                case .failure(let error):
-                    observer.onError(error)
-                }
+    func fetchTrendingMovies(page: Int, completion: @escaping (Result<[Movie], APIError>) -> Void) {
+        let movieEndpoint: MovieEndpoint = .getTrendingMovies(page: page)
+        WebServices.request(apiEndpoint: movieEndpoint) { (result: Result<TrendingMoviesResponse, APIError>) in
+            switch result {
+            case .success(let respone):
+                completion(.success(respone.results))
+            case .failure(let error):
+                completion(.failure(error))
             }
-            return Disposables.create()
         }
     }
 }

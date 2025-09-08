@@ -8,6 +8,7 @@
 import Foundation
 
 enum APIError: Error {
+    case invalidURL
     case badRequest           // 400
     case unauthorized         // 401
     case forbidden            // 403
@@ -17,9 +18,9 @@ enum APIError: Error {
     case unprocessable        // 422
     case internalServerError  // 500
     case serviceUnavailable   // 503
-    case timeout              // request timed out
-    case network              // network unavailable
-    case unknown              // unknown error
+    case timeout              // request timed out -1001
+    case network              // network unavailable - 1009
+    case unknown              // unknown error -1
     
     var code: Int {
         switch self {
@@ -35,11 +36,13 @@ enum APIError: Error {
         case .timeout               : return -1001
         case .network               : return -1009
         case .unknown               : return -1
+        default: return -1
         }
     }
     
     var message: String {
         switch self {
+        case .invalidURL: return "Invalid URL, please check URL again."
         case .badRequest: return "Bad request. The server could not understand the request."
         case .unauthorized: return "Unauthorized. You need to login or provide valid credentials."
         case .forbidden: return "Forbidden. You do not have permission to access this resource."
